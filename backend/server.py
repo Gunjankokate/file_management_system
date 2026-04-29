@@ -8,7 +8,7 @@ from pymongo import MongoClient
 import bcrypt
 
 # ================= CONFIG =================
-PORT = 8000
+PORT = int(os.environ.get("PORT", 8000))
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 PROFILE_DIR = os.path.join(os.path.dirname(__file__), "profiles")
 MAX_STORAGE_BYTES = 100 * 1024 * 1024  # 100 MB per user default
@@ -297,7 +297,8 @@ class MyServer(BaseHTTPRequestHandler):
 
                     fsize = len(file_data)
                     ftype = get_file_type(safe_name)
-                    url   = f"http://localhost:{PORT}/uploads/{safe_name}"
+                    BASE_URL = os.environ.get("https://cloudvault1-aufyf2ewhvf5erdc.eastasia-01.azurewebsites.net/uploads/file.jpg", f"localhost:{PORT}")
+                    url = f"https://{BASE_URL}/uploads/{safe_name}"
                     now   = datetime.datetime.utcnow().isoformat()
 
                     files_col.delete_one({"name": safe_name})
