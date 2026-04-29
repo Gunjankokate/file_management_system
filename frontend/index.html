@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudVault – Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+:root{
+  --accent:#6366f1;--accent2:#8b5cf6;--bg:#0a0f1e;--card:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.12);--text:#f1f5f9;--muted:#94a3b8;
+}
+body{min-height:100vh;display:flex;justify-content:center;align-items:center;background:var(--bg);overflow:hidden}
+.bg{position:fixed;inset:0;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.4;animation:float 8s ease-in-out infinite}
+.blob1{width:500px;height:500px;background:radial-gradient(#6366f1,transparent);top:-100px;left:-100px;animation-delay:0s}
+.blob2{width:400px;height:400px;background:radial-gradient(#8b5cf6,transparent);bottom:-80px;right:-80px;animation-delay:3s}
+.blob3{width:300px;height:300px;background:radial-gradient(#06b6d4,transparent);top:40%;left:40%;animation-delay:6s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+.card{position:relative;z-index:1;background:var(--card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:28px;padding:48px 44px;width:400px;color:var(--text);box-shadow:0 32px 80px rgba(0,0,0,0.5)}
+.brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
+.brand-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.brand-name{font-size:1.5rem;font-weight:700;background:linear-gradient(135deg,#a5b4fc,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tagline{text-align:center;color:var(--muted);font-size:0.82rem;margin-bottom:28px}
+.tabs{display:flex;background:rgba(0,0,0,0.3);border-radius:14px;padding:4px;margin-bottom:28px}
+.tab{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);font-size:0.9rem;cursor:pointer;border-radius:11px;transition:all .25s;font-weight:500}
+.tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 16px rgba(99,102,241,0.4)}
+.field{position:relative;margin-bottom:16px}
+.field label{display:block;font-size:0.78rem;color:var(--muted);font-weight:500;margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+.field input{width:100%;padding:13px 16px 13px 44px;border:1.5px solid var(--border);outline:none;border-radius:13px;background:rgba(255,255,255,0.05);color:var(--text);font-size:0.95rem;transition:.25s}
+.field input::placeholder{color:rgba(255,255,255,0.3)}
+.field input:focus{border-color:var(--accent);background:rgba(99,102,241,0.08);box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+.icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
+.field label+.icon{top:calc(50% + 12px)}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:1rem;opacity:.6}
+.field label+.eye{top:calc(50% + 12px)}
+.btn{width:100%;padding:14px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:.25s;letter-spacing:.3px;margin-top:4px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,0.5)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+#msg{margin-top:14px;font-size:0.85rem;min-height:22px;text-align:center;border-radius:8px;padding:0;transition:.25s}
+.msg-error{color:#f87171;background:rgba(248,113,113,.1);padding:8px 12px!important}
+.msg-ok{color:#34d399;background:rgba(52,211,153,.1);padding:8px 12px!important}
+.form-section{display:none}.form-section.active{display:block}
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--muted);font-size:0.8rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<div class="card">
+  <div class="brand">
+    <div class="brand-icon">☁️</div>
+    <div class="brand-name">CloudVault</div>
+  </div>
+  <p class="tagline">Secure cloud storage for everyone</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Sign In</button>
+    <button class="tab" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginForm" class="form-section active">
+    <div class="field">
+      <label>Username</label>
+      <span class="icon">👤</span>
+      <input type="text" id="loginUser" placeholder="Enter your username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <span class="icon">🔒</span>
+      <input type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password">
+      <span class="eye" onclick="toggleEye('loginPass',this)">👁️</span>
+    </div>
+    <button class="btn" id="loginBtn" onclick="doLogin()">Sign In</button>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerForm" class="form-section">
+    <div class="field">
+      <label>Username</label>
+      <span class="icon">👤</span>
+      <input type="text" id="regUser" placeholder="Choose a username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Email (optional)</label>
+      <span class="icon">📧</span>
+      <input type="email" id="regEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <span class="icon">🔒</span>
+      <input type="password" id="regPass" placeholder="Min 6 characters" autocomplete="new-password">
+      <span class="eye" onclick="toggleEye('regPass',this)">👁️</span>
+    </div>
+    <button class="btn" id="regBtn" onclick="doRegister()">Create Account</button>
+  </div>
+
+  <div id="msg"></div>
+</div>
+
+<script>
+const BASE = "http://localhost:8000";
+
+function switchTab(tab) {
+  document.getElementById("loginForm").classList.toggle("active", tab === "login");
+  document.getElementById("registerForm").classList.toggle("active", tab === "register");
+  document.querySelectorAll(".tab").forEach((t,i) => t.classList.toggle("active", (i===0) === (tab==="login")));
+  setMsg("","");
+}
+
+function toggleEye(id, el) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === "password" ? "text" : "password";
+  el.textContent = inp.type === "password" ? "👁️" : "🙈";
+}
+
+function setMsg(text, cls) {
+  const el = document.getElementById("msg");
+  el.textContent = text;
+  el.className = cls;
+}
+
+async function doLogin() {
+  const username = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value;
+  if (!username || !password) return setMsg("Please fill all fields", "msg-error");
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true; btn.textContent = "Signing in…";
+  try {
+    const res = await fetch(`${BASE}/login`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username, password})
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      localStorage.setItem("user", JSON.stringify({
+        username, role: data.role,
+        storage_used: data.storage_used,
+        storage_quota: data.storage_quota,
+        profile_pic: data.profile_pic,
+        display_name: data.display_name,
+        email: data.email
+      }));
+      window.location.href = data.role === "admin" ? "admin.html" : "dashboard.html";
+    } else {
+      setMsg("Invalid username or password", "msg-error");
+    }
+  } catch {
+    setMsg("Cannot connect to server. Is it running?", "msg-error");
+  } finally {
+    btn.disabled = false; btn.textContent = "Sign In";
+  }
+}
+
+async function doRegister() {
+  const username = document.getElementById("regUser").value.trim();
+  const email    = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPass").value;
+  if (!username || !password) return setMsg("Please fill all fields", "msg-error");
+  if (password.length < 6) return setMsg("Password must be at least 6 characters", "msg-error");
+  const btn = document.getElementById("regBtn");
+  btn.disabled = true; btn.textContent = "Creating account…";
+  try {
+    const res = await fetch(`${BASE}/register`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username, password, email})
+    });
+    const data = await res.json();
+    if (data.status === "registered") {
+      setMsg("Account created! Please sign in.", "msg-ok");
+      switchTab("login");
+      document.getElementById("loginUser").value = username;
+    } else if (data.status === "exists") {
+      setMsg("Username already taken", "msg-error");
+    } else {
+      setMsg("Registration failed", "msg-error");
+    }
+  } catch {
+    setMsg("Cannot connect to server", "msg-error");
+  } finally {
+    btn.disabled = false; btn.textContent = "Create Account";
+  }
+}
+
+// Enter key support
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    const loginActive = document.getElementById("loginForm").classList.contains("active");
+    if (loginActive) doLogin(); else doRegister();
+  }
+});
+
+// Redirect if already logged in
+const u = JSON.parse(localStorage.getItem("user") || "null");
+if (u) window.location.href = u.role === "admin" ? "admin.html" : "dashboard.html";
+</script>
+</body>
+</html>

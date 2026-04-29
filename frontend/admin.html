@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – CloudVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+:root{
+  --accent:#6366f1;--accent2:#8b5cf6;--bg:#070d1a;--sidebar:#0a1220;
+  --card:#0f1a2e;--card2:#162035;--border:#1a2840;--text:#f1f5f9;
+  --muted:#475569;--muted2:#94a3b8;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;
+  --admin:#f59e0b;
+}
+body{display:flex;height:100vh;background:var(--bg);color:var(--text);overflow:hidden}
+/* ---- SIDEBAR ---- */
+.sidebar{width:240px;background:var(--sidebar);display:flex;flex-direction:column;border-right:1px solid var(--border);flex-shrink:0}
+.sidebar-top{padding:20px 16px;flex:1;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,#f59e0b,#f97316);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.brand-name{font-size:1.1rem;font-weight:700;color:var(--text)}
+.admin-badge{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(249,115,22,.2));border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.admin-avatar{width:38px;height:38px;border-radius:50%;border:2px solid var(--admin);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1rem;overflow:hidden;flex-shrink:0}
+.admin-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.admin-info{}
+.admin-name{font-size:0.88rem;font-weight:600}
+.admin-role{font-size:0.72rem;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:1px 7px;color:#fbbf24;display:inline-block;margin-top:2px}
+.nav-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:10px 8px 4px;font-weight:600}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:none;background:transparent;color:var(--muted2);border-radius:10px;font-size:0.9rem;cursor:pointer;transition:.2s;margin-bottom:2px;text-align:left}
+.nav-btn:hover{background:var(--card2);color:var(--text)}
+.nav-btn.active{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+.nav-btn .nav-icon{font-size:1.1rem;width:22px;text-align:center}
+.sidebar-footer{padding:12px 16px 16px;border-top:1px solid var(--border)}
+.btn-logout{width:100%;padding:10px;border:none;border-radius:10px;background:rgba(239,68,68,.1);color:#f87171;font-size:0.9rem;cursor:pointer;transition:.2s;border:1px solid rgba(239,68,68,.2)}
+.btn-logout:hover{background:rgba(239,68,68,.2)}
+
+/* ---- MAIN ---- */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--sidebar);flex-shrink:0}
+.topbar-title{font-size:1.1rem;font-weight:600;flex:1}
+.topbar-badge{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:4px 12px;font-size:0.78rem;color:#fbbf24;font-weight:600}
+.topbar-search{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 14px;flex:1;max-width:280px}
+.topbar-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:0.9rem;width:100%}
+.topbar-search input::placeholder{color:var(--muted)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+.page{display:none}.page.active{display:block}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.page-header h2{font-size:1.3rem;font-weight:700}
+
+/* ---- STAT CARDS ---- */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.2s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;transform:translate(20px,-20px);opacity:.15}
+.stat-card.purple::before{background:var(--accent)}
+.stat-card.gold::before{background:var(--admin)}
+.stat-card.green::before{background:var(--success)}
+.stat-card.red::before{background:var(--danger)}
+.stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.stat-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.stat-trend{font-size:0.72rem;padding:2px 8px;border-radius:20px}
+.stat-value{font-size:1.8rem;font-weight:700;line-height:1}
+.stat-label{font-size:0.78rem;color:var(--muted2);margin-top:4px}
+
+/* ---- TABLES ---- */
+.table-container{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.table-header h3{font-size:0.95rem;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead th{padding:11px 16px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted2);background:rgba(255,255,255,.02);text-align:left}
+tbody tr{border-top:1px solid var(--border);transition:.15s}
+tbody tr:hover{background:var(--card2)}
+tbody td{padding:12px 16px;font-size:0.87rem}
+.user-cell{display:flex;align-items:center;gap:10px}
+.user-mini-avatar{width:32px;height:32px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.9rem;overflow:hidden;flex-shrink:0}
+.user-mini-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.user-mini-name{font-weight:500}
+.user-mini-email{font-size:0.72rem;color:var(--muted2)}
+.role-badge{font-size:0.72rem;padding:2px 9px;border-radius:20px;display:inline-block;font-weight:600}
+.role-admin{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:#fbbf24}
+.role-user{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);color:#a5b4fc}
+.storage-mini{min-width:110px}
+.mini-bar-bg{height:4px;background:rgba(255,255,255,.06);border-radius:99px;margin-top:4px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
+.mini-bar-fill.warn{background:linear-gradient(90deg,var(--warning),#f97316)}
+.mini-bar-fill.danger{background:linear-gradient(90deg,var(--danger),#f97316)}
+
+.action-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:0.78rem;cursor:pointer;transition:.2s}
+.action-btn:hover{border-color:var(--accent);color:var(--text)}
+.action-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+.action-btn.success:hover{border-color:var(--success);color:#34d399}
+.action-btn.warn:hover{border-color:var(--warning);color:#fbbf24}
+
+/* Buttons */
+.btn-primary{padding:9px 20px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-size:0.88rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,.4)}
+.btn-admin{padding:9px 20px;background:linear-gradient(135deg,#f59e0b,#f97316);border:none;border-radius:10px;color:#fff;font-size:0.88rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-admin:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.4)}
+
+/* Add User Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:420px;max-width:90vw}
+.modal h3{font-size:1.1rem;font-weight:700;margin-bottom:20px}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-group label{font-size:0.78rem;color:var(--muted2);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.form-group input,.form-group select{padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:rgba(255,255,255,.04);color:var(--text);font-size:0.9rem;outline:none;transition:.2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group input::placeholder{color:var(--muted)}
+.form-group select option{background:#1a2234;color:var(--text)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.btn-cancel{padding:10px 20px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--muted2);font-size:0.9rem;cursor:pointer;transition:.2s}
+.btn-cancel:hover{border-color:var(--accent);color:var(--text)}
+
+/* Quota modal */
+.quota-slider{width:100%;margin:8px 0;accent-color:var(--accent)}
+.quota-display{text-align:center;font-size:1.1rem;font-weight:700;color:var(--accent);margin-top:4px}
+
+/* Files page */
+.files-filter{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.files-filter input{flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card2);color:var(--text);font-size:0.88rem;outline:none}
+.files-filter input:focus{border-color:var(--accent)}
+
+/* Activity */
+.activity-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--border)}
+.activity-item:first-child{border-top:none}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.act-info{flex:1}
+.act-action{font-size:0.87rem;font-weight:500}
+.act-detail{font-size:0.78rem;color:var(--muted2)}
+.act-user{font-size:0.72rem;color:var(--muted2);min-width:80px;text-align:right}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:0.88rem;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateX(120%);transition:.3s}
+.toast.show{transform:translateX(0)}
+.toast.ok{border-color:rgba(16,185,129,.4);color:#34d399}
+.toast.err{border-color:rgba(239,68,68,.4);color:#f87171}
+.toast.warn{border-color:rgba(245,158,11,.4);color:#fbbf24}
+
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
+.empty-state .es-icon{font-size:2.5rem;margin-bottom:10px;opacity:.4}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <div class="brand">
+      <div class="brand-icon">👑</div>
+      <span class="brand-name">CloudVault</span>
+    </div>
+
+    <div class="admin-badge">
+      <div class="admin-avatar" id="adminAvatar">👑</div>
+      <div class="admin-info">
+        <div class="admin-name" id="adminName">Admin</div>
+        <div class="admin-role">Administrator</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Dashboard</div>
+    <button class="nav-btn active" onclick="showPage('overview')" id="nav-overview"><span class="nav-icon">📊</span>Overview</button>
+    <button class="nav-btn" onclick="showPage('users')" id="nav-users"><span class="nav-icon">👥</span>Users</button>
+    <button class="nav-btn" onclick="showPage('files')" id="nav-files"><span class="nav-icon">📁</span>All Files</button>
+    <button class="nav-btn" onclick="showPage('activity')" id="nav-activity"><span class="nav-icon">🕐</span>Activity Log</button>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="doLogout()">🚪 Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Overview</div>
+    <span class="topbar-badge">👑 Admin Panel</span>
+    <div class="topbar-search">
+      <span>🔍</span>
+      <input type="text" id="topbarSearch" placeholder="Search…" oninput="handleSearch()">
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <h2>System Overview</h2>
+        <button class="btn-admin" onclick="loadStats()">🔄 Refresh</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card purple">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(99,102,241,.15)">👥</div>
+            <span class="stat-trend" style="background:rgba(99,102,241,.15);color:#a5b4fc">Total</span>
+          </div>
+          <div class="stat-value" id="ovUsers">—</div>
+          <div class="stat-label">Registered Users</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(245,158,11,.15)">👑</div>
+          </div>
+          <div class="stat-value" id="ovAdmins">—</div>
+          <div class="stat-label">Admins</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(16,185,129,.15)">📁</div>
+          </div>
+          <div class="stat-value" id="ovFiles">—</div>
+          <div class="stat-label">Total Files</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(239,68,68,.15)">💾</div>
+          </div>
+          <div class="stat-value" id="ovStorage">—</div>
+          <div class="stat-label">Storage Used</div>
+        </div>
+      </div>
+
+      <div class="table-container" style="margin-bottom:20px">
+        <div class="table-header"><h3>🆕 Recently Joined Users</h3></div>
+        <div id="recentUsersList"></div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header"><h3>📋 Recent Activity</h3></div>
+        <div id="overviewActivity"></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="page-header">
+        <h2>User Management</h2>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="userSearch" placeholder="🔍 Search users…" style="padding:9px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card2);color:var(--text);font-size:.88rem;outline:none;width:200px" oninput="renderUsersTable()">
+          <button class="btn-admin" onclick="openAddUser()">➕ Add User</button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Storage</th>
+              <th>Files</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+        <div id="usersEmpty" class="empty-state" style="display:none"><div class="es-icon">👤</div><p>No users found</p></div>
+      </div>
+    </div>
+
+    <!-- FILES -->
+    <div class="page" id="page-files">
+      <div class="page-header">
+        <h2>All Files</h2>
+        <span id="allFilesCount" style="font-size:.9rem;color:var(--muted2)"></span>
+      </div>
+      <div class="files-filter">
+        <input type="text" id="filesSearch" placeholder="Search files…" oninput="renderFilesTable()">
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>File</th><th>Owner</th><th>Type</th><th>Size</th><th>Uploaded</th><th>Shared</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="filesTableBody"></tbody>
+        </table>
+        <div id="filesEmpty" class="empty-state" style="display:none"><div class="es-icon">📂</div><p>No files found</p></div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="page" id="page-activity">
+      <div class="page-header"><h2>Activity Log</h2><span id="activityCount" style="font-size:.9rem;color:var(--muted2)"></span></div>
+      <div class="table-container">
+        <div id="activityLogList"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <h3>➕ Add New User</h3>
+    <div class="form-group"><label>Username</label><input type="text" id="newUsername" placeholder="Username"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="newEmail" placeholder="email@example.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="newPassword" placeholder="Min 6 characters"></div>
+    <div class="form-group">
+      <label>Role</label>
+      <select id="newRole">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Storage Quota</label>
+      <select id="newQuota">
+        <option value="52428800">50 MB</option>
+        <option value="104857600" selected>100 MB</option>
+        <option value="524288000">500 MB</option>
+        <option value="1073741824">1 GB</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn-admin" onclick="addUser()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quota Modal -->
+<div class="modal-overlay" id="quotaModal">
+  <div class="modal">
+    <h3>💾 Update Storage Quota</h3>
+    <p style="color:var(--muted2);font-size:.88rem;margin-bottom:16px">Adjusting quota for: <strong id="quotaUsername"></strong></p>
+    <div class="form-group">
+      <label>Quota (MB)</label>
+      <input type="range" class="quota-slider" id="quotaSlider" min="10" max="10240" step="10" value="100" oninput="document.getElementById('quotaDisplay').textContent=fmtBytes(this.value*1024*1024)">
+    </div>
+    <div class="quota-display" id="quotaDisplay">100 MB</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('quotaModal')">Cancel</button>
+      <button class="btn-admin" onclick="saveQuota()">Save Quota</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = "http://localhost:8000";
+let currentAdmin = JSON.parse(localStorage.getItem("user") || "null");
+let allUsers = [];
+let allFiles = [];
+let quotaTarget = "";
+
+if (!currentAdmin || currentAdmin.role !== "admin") {
+  alert("Access denied. Admins only.");
+  window.location.href = "index.html";
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("adminName").textContent = currentAdmin.display_name || currentAdmin.username;
+  if (currentAdmin.profile_pic) {
+    const aa = document.getElementById("adminAvatar");
+    aa.innerHTML = `<img src="${currentAdmin.profile_pic}" alt="">`;
+  }
+  await loadStats();
+  await loadUsers();
+  await loadAllFiles();
+  await loadActivityLog();
+});
+
+// ========== STATS ==========
+async function loadStats() {
+  try {
+    const res = await fetch(`${BASE}/stats`);
+    const d = await res.json();
+    document.getElementById("ovUsers").textContent   = d.total_users;
+    document.getElementById("ovAdmins").textContent  = d.total_admins;
+    document.getElementById("ovFiles").textContent   = d.total_files;
+    document.getElementById("ovStorage").textContent = fmtBytes(d.total_size);
+
+    // Recent users
+    const rul = document.getElementById("recentUsersList");
+    if (d.recent_users && d.recent_users.length) {
+      rul.innerHTML = `<div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">` +
+        d.recent_users.map(u => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--card2);border-radius:8px;border:1px solid var(--border)">
+            <div class="user-mini-avatar">${u.profile_pic ? `<img src="${u.profile_pic}" alt="">` : "👤"}</div>
+            <div style="flex:1">
+              <div style="font-size:.87rem;font-weight:500">${u.display_name||u.username}</div>
+              <div style="font-size:.72rem;color:var(--muted2)">${u.email||"No email"} · ${fmtDate(u.created_at)}</div>
+            </div>
+            <span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role||"user"}</span>
+          </div>`).join("") + "</div>";
+    } else {
+      rul.innerHTML = `<div class="empty-state"><div class="es-icon">👥</div><p>No users yet</p></div>`;
+    }
+  } catch { toast("Failed to load stats", "err"); }
+}
+
+// ========== USERS ==========
+async function loadUsers() {
+  try {
+    const res = await fetch(`${BASE}/users`);
+    allUsers = await res.json();
+    renderUsersTable();
+  } catch { toast("Failed to load users", "err"); }
+}
+
+function renderUsersTable() {
+  const q = (document.getElementById("userSearch")?.value || "").toLowerCase();
+  const filtered = q ? allUsers.filter(u =>
+    (u.username||"").toLowerCase().includes(q) ||
+    (u.email||"").toLowerCase().includes(q) ||
+    (u.display_name||"").toLowerCase().includes(q)
+  ) : allUsers;
+
+  const tbody = document.getElementById("usersTableBody");
+  document.getElementById("usersEmpty").style.display = filtered.length ? "none" : "block";
+  if (!filtered.length) { tbody.innerHTML = ""; return; }
+
+  tbody.innerHTML = filtered.map(u => {
+    const used = u.storage_used || 0;
+    const quota = u.storage_quota || 104857600;
+    const pct = Math.min(100, (used / quota) * 100);
+    const cls = pct > 90 ? "danger" : pct > 70 ? "warn" : "";
+    const isSelf = u.username === currentAdmin.username;
+    return `
+      <tr>
+        <td>
+          <div class="user-cell">
+            <div class="user-mini-avatar">${u.profile_pic ? `<img src="${u.profile_pic}" alt="">` : "👤"}</div>
+            <div>
+              <div class="user-mini-name">${u.display_name||u.username}</div>
+              <div class="user-mini-email">${u.email||"—"}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role||"user"}</span>
+        </td>
+        <td class="storage-mini">
+          <div style="font-size:.78rem">${fmtBytes(used)} / ${fmtBytes(quota)}</div>
+          <div class="mini-bar-bg"><div class="mini-bar-fill ${cls}" style="width:${pct}%"></div></div>
+        </td>
+        <td>${u.file_count||0}</td>
+        <td style="font-size:.78rem;color:var(--muted2)">${fmtDate(u.created_at)}</td>
+        <td>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="action-btn warn" onclick="openQuota('${u.username}',${quota})">💾 Quota</button>
+            <button class="action-btn" onclick="toggleRole('${u.username}','${u.role||'user'}')">
+              ${u.role==='admin' ? '👤 Make User' : '👑 Make Admin'}
+            </button>
+            ${!isSelf ? `<button class="action-btn danger" onclick="deleteUser('${u.username}')">🗑 Delete</button>` : ""}
+          </div>
+        </td>
+      </tr>`;
+  }).join("");
+}
+
+async function addUser() {
+  const username = document.getElementById("newUsername").value.trim();
+  const email    = document.getElementById("newEmail").value.trim();
+  const password = document.getElementById("newPassword").value;
+  const role     = document.getElementById("newRole").value;
+  const quota    = parseInt(document.getElementById("newQuota").value);
+  if (!username || !password) return toast("Username and password required", "err");
+  if (password.length < 6) return toast("Password must be at least 6 characters", "err");
+  try {
+    const r1 = await fetch(`${BASE}/register`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username, email, password, role})
+    });
+    const d = await r1.json();
+    if (d.status !== "registered") return toast(d.message||"Failed to create user", "err");
+    // Set quota
+    await fetch(`${BASE}/update-quota`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username, quota})
+    });
+    closeModal("addUserModal");
+    toast(`✅ User "${username}" created`, "ok");
+    await loadUsers();
+    await loadStats();
+    document.getElementById("newUsername").value = "";
+    document.getElementById("newEmail").value = "";
+    document.getElementById("newPassword").value = "";
+  } catch { toast("Failed to create user", "err"); }
+}
+
+async function toggleRole(username, currentRole) {
+  const newRole = currentRole === "admin" ? "user" : "admin";
+  if (!confirm(`Change ${username} to ${newRole}?`)) return;
+  try {
+    await fetch(`${BASE}/update-role`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username, role: newRole})
+    });
+    toast(`✅ ${username} is now a ${newRole}`, "ok");
+    await loadUsers();
+  } catch { toast("Failed to update role", "err"); }
+}
+
+async function deleteUser(username) {
+  if (!confirm(`Delete user "${username}" and ALL their files? This cannot be undone.`)) return;
+  try {
+    await fetch(`${BASE}/delete-user`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username})
+    });
+    toast(`🗑 User "${username}" deleted`, "ok");
+    await loadUsers(); await loadAllFiles(); await loadStats();
+  } catch { toast("Failed to delete user", "err"); }
+}
+
+function openQuota(username, currentQuota) {
+  quotaTarget = username;
+  document.getElementById("quotaUsername").textContent = username;
+  const mb = Math.round(currentQuota / (1024*1024));
+  document.getElementById("quotaSlider").value = mb;
+  document.getElementById("quotaDisplay").textContent = fmtBytes(currentQuota);
+  openModal("quotaModal");
+}
+
+async function saveQuota() {
+  const mb = parseInt(document.getElementById("quotaSlider").value);
+  const quota = mb * 1024 * 1024;
+  try {
+    await fetch(`${BASE}/update-quota`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({username: quotaTarget, quota})
+    });
+    closeModal("quotaModal");
+    toast(`✅ Quota for "${quotaTarget}" set to ${fmtBytes(quota)}`, "ok");
+    await loadUsers();
+  } catch { toast("Failed to update quota", "err"); }
+}
+
+// ========== FILES ==========
+async function loadAllFiles() {
+  try {
+    const res = await fetch(`${BASE}/files`);
+    allFiles = await res.json();
+    document.getElementById("allFilesCount").textContent = `${allFiles.length} files total`;
+    renderFilesTable();
+  } catch { toast("Failed to load files", "err"); }
+}
+
+function renderFilesTable() {
+  const q = (document.getElementById("filesSearch")?.value || "").toLowerCase();
+  const filtered = q ? allFiles.filter(f => (f.name||"").toLowerCase().includes(q) || (f.owner||"").toLowerCase().includes(q)) : allFiles;
+  document.getElementById("filesEmpty").style.display = filtered.length ? "none" : "block";
+  const tbody = document.getElementById("filesTableBody");
+  if (!filtered.length) { tbody.innerHTML = ""; return; }
+  const icons = {image:"🖼️",video:"🎬",audio:"🎵",pdf:"📄",doc:"📝",sheet:"📊",archive:"📦",file:"📎"};
+  tbody.innerHTML = filtered.map(f => `
+    <tr>
+      <td style="font-size:.87rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${f.name}">${icons[f.type]||"📎"} ${f.name}</td>
+      <td style="font-size:.82rem;color:var(--muted2)">${f.owner||"—"}</td>
+      <td><span style="background:rgba(255,255,255,.06);border-radius:6px;padding:2px 8px;font-size:.75rem">${f.type||"file"}</span></td>
+      <td style="font-size:.82rem;color:var(--muted2)">${fmtBytes(f.size||0)}</td>
+      <td style="font-size:.78rem;color:var(--muted2)">${fmtDate(f.uploaded_at)}</td>
+      <td>${f.shared ? '<span style="color:#34d399;font-size:.8rem">🔗 Yes</span>' : '<span style="color:var(--muted);font-size:.8rem">🔒 No</span>'}</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <a href="${f.url}" target="_blank" class="action-btn">⬇</a>
+          <button class="action-btn danger" onclick="adminDeleteFile('${f.name}','${f.owner||''}')">🗑</button>
+        </div>
+      </td>
+    </tr>`).join("");
+}
+
+async function adminDeleteFile(name, owner) {
+  if (!confirm(`Delete file "${name}"?`)) return;
+  try {
+    await fetch(`${BASE}/delete`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({name, username: owner})
+    });
+    toast(`🗑 File deleted`, "ok");
+    await loadAllFiles(); await loadStats();
+  } catch { toast("Failed to delete", "err"); }
+}
+
+// ========== ACTIVITY ==========
+async function loadActivityLog() {
+  try {
+    const res = await fetch(`${BASE}/activity?limit=50`);
+    const logs = await res.json();
+    document.getElementById("activityCount").textContent = `${logs.length} recent events`;
+
+    const colors = {login:"#6366f1",register:"#10b981",upload:"#06b6d4",delete_file:"#ef4444",delete_user:"#f97316",toggle_share:"#f59e0b",update_profile:"#8b5cf6",change_password:"#ec4899",update_quota:"#14b8a6",update_role:"#f59e0b"};
+    const fmtAct = {login:"Signed in",register:"Registered",upload:"Uploaded file",delete_file:"Deleted file",delete_user:"Deleted user",toggle_share:"Toggled share",update_profile:"Updated profile",change_password:"Changed password",update_quota:"Updated quota",update_role:"Changed role"};
+
+    const html = logs.length ? logs.map(l => `
+      <div class="activity-item">
+        <div class="act-dot" style="background:${colors[l.action]||"#94a3b8"}"></div>
+        <div class="act-info">
+          <div class="act-action">${fmtAct[l.action]||l.action}${l.detail ? ` — <span style="color:var(--muted2)">${l.detail}</span>` : ""}</div>
+          <div class="act-detail">${fmtDate(l.timestamp)}</div>
+        </div>
+        <div class="act-user">@${l.username}</div>
+      </div>`).join("") :
+      `<div class="empty-state"><div class="es-icon">📋</div><p>No activity yet</p></div>`;
+
+    document.getElementById("activityLogList").innerHTML = html;
+    document.getElementById("overviewActivity").innerHTML = (logs.length ? logs.slice(0,8) : []).map(l => `
+      <div class="activity-item">
+        <div class="act-dot" style="background:${colors[l.action]||"#94a3b8"}"></div>
+        <div class="act-info">
+          <div class="act-action">${fmtAct[l.action]||l.action}${l.detail ? ` — <span style="color:var(--muted2)">${l.detail}</span>` : ""}</div>
+          <div class="act-detail">${fmtDate(l.timestamp)}</div>
+        </div>
+        <div class="act-user">@${l.username}</div>
+      </div>`).join("") || `<div class="empty-state"><div class="es-icon">📋</div><p>No activity yet</p></div>`;
+  } catch {}
+}
+
+// ========== NAVIGATION ==========
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + id).classList.add("active");
+  const nb = document.getElementById("nav-" + id);
+  if (nb) nb.classList.add("active");
+  const titles = {overview:"System Overview",users:"User Management",files:"All Files",activity:"Activity Log"};
+  document.getElementById("topbarTitle").textContent = titles[id] || id;
+}
+
+function handleSearch() {
+  const q = document.getElementById("topbarSearch").value;
+  if (document.getElementById("page-users").classList.contains("active")) {
+    document.getElementById("userSearch").value = q; renderUsersTable();
+  } else if (document.getElementById("page-files").classList.contains("active")) {
+    document.getElementById("filesSearch").value = q; renderFilesTable();
+  }
+}
+
+// ========== MODAL ==========
+function openModal(id)  { document.getElementById(id).classList.add("show"); }
+function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+function openAddUser()  { openModal("addUserModal"); }
+window.addEventListener("click", e => {
+  if (e.target.classList.contains("modal-overlay")) e.target.classList.remove("show");
+});
+
+// ========== LOGOUT ==========
+function doLogout() { localStorage.removeItem("user"); window.location.href = "index.html"; }
+
+// ========== UTILS ==========
+function fmtBytes(b) {
+  if (!b || b===0) return "0 B";
+  const k=1024, s=["B","KB","MB","GB"];
+  const i=Math.floor(Math.log(b)/Math.log(k));
+  return parseFloat((b/Math.pow(k,i)).toFixed(1))+" "+s[i];
+}
+function fmtDate(iso) {
+  if (!iso) return "—";
+  try {
+    const d=new Date(iso), diff=Date.now()-d.getTime();
+    if(diff<60000) return "just now";
+    if(diff<3600000) return Math.floor(diff/60000)+"m ago";
+    if(diff<86400000) return Math.floor(diff/3600000)+"h ago";
+    return d.toLocaleDateString();
+  } catch { return iso; }
+}
+function toast(msg, type="ok") {
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className=`toast show ${type}`;
+  setTimeout(()=>t.className="toast",3000);
+}
+</script>
+</body>
+</html>
